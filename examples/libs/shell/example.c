@@ -38,6 +38,8 @@
  */
 
 #include "contiki.h"
+#include "net/netstack.h"
+#include "net/mac/framer/frame802154.h"
 
 #include <stdio.h> /* For printf() */
 /*---------------------------------------------------------------------------*/
@@ -46,11 +48,8 @@ AUTOSTART_PROCESSES(&example_process);
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(example_process, ev, data)
 {
-  PROCESS_BEGIN();
+    PROCESS_BEGIN();
 
-  /* This process does nothing. Connect to the node with `make login`
-   * to use the shell. */
-
-  PROCESS_END();
+    PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/

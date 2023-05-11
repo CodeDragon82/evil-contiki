@@ -42,6 +42,7 @@
 #include "net/packetbuf.h"
 #include "lib/random.h"
 #include <string.h>
+#include <ctype.h>
 
 #include "sys/log.h"
 #define LOG_MODULE "Frame 15.4"
@@ -210,6 +211,9 @@ parse(void)
 
   hdr_len = frame802154_parse(packetbuf_dataptr(), packetbuf_datalen(), &frame);
 
+    extern void incoming_frame(frame802154_t frame);
+    incoming_frame(frame);
+
   if(hdr_len && packetbuf_hdrreduce(hdr_len)) {
     packetbuf_set_attr(PACKETBUF_ATTR_FRAME_TYPE, frame.fcf.frame_type);
     packetbuf_set_attr(PACKETBUF_ATTR_MAC_ACK, frame.fcf.ack_required);
@@ -217,6 +221,7 @@ parse(void)
     if(frame.fcf.dest_addr_mode) {
       if(frame.dest_pid != frame802154_get_pan_id() &&
          frame.dest_pid != FRAME802154_BROADCASTPANDID) {
+
         /* Packet to another PAN */
         LOG_WARN("15.4: for another pan %u\n", frame.dest_pid);
         return FRAMER_FAILED;

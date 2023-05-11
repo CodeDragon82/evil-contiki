@@ -1,3 +1,5 @@
+MODULES += os/services/shell
+
 CONTIKI_PROJECT = udp-client udp-server
 all: $(CONTIKI_PROJECT)
 

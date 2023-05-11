@@ -75,6 +75,8 @@
 #endif
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
 
 #define PING_TIMEOUT (5 * CLOCK_SECOND)
 
@@ -380,7 +382,7 @@ PT_THREAD(cmd_help(struct pt *pt, shell_output_func output, char *args))
   /* Note: we explicitly don't expend any code space to deal with shadowing */
   for(set = list_head(shell_command_sets); set != NULL; set = list_item_next(set)) {
     for(cmd = set->commands; cmd->name != NULL; ++cmd) {
-      SHELL_OUTPUT(output, "%s\n", cmd->help);
+      SHELL_OUTPUT(output, "%-20s%s\n", cmd->name, cmd->help);
     }
   }
 
@@ -930,6 +932,8 @@ PT_THREAD(cmd_llsec_setkey(struct pt *pt, shell_output_func output, char *args))
 }
 #endif /* LLSEC802154_ENABLED */
 /*---------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------*/
 void
 shell_commands_init(void)
 {
@@ -977,31 +981,31 @@ shell_command_lookup(const char *name)
 }
 /*---------------------------------------------------------------------------*/
 const struct shell_command_t builtin_shell_commands[] = {
-  { "help",                 cmd_help,                 "'> help': Shows this help" },
-  { "reboot",               cmd_reboot,               "'> reboot': Reboot the board by watchdog_reboot()" },
-  { "log",                  cmd_log,                  "'> log module level': Sets log level (0--4) for a given module (or \"all\"). For module \"mac\", level 4 also enables per-slot logging." },
-  { "mac-addr",             cmd_macaddr,               "'> mac-addr': Shows the node's MAC address" },
+  { "help",                 cmd_help,                 "Shows this help" },
+  { "reboot",               cmd_reboot,               "Reboot the board by watchdog_reboot()" },
+  { "log",                  cmd_log,                  "Sets log level (0--4) for a given module (or \"all\")." },
+  { "mac-addr",             cmd_macaddr,               "Shows the node's MAC address" },
 #if NETSTACK_CONF_WITH_IPV6
-  { "ip-addr",              cmd_ipaddr,               "'> ip-addr': Shows all IPv6 addresses" },
-  { "ip-nbr",               cmd_ip_neighbors,         "'> ip-nbr': Shows all IPv6 neighbors" },
-  { "ping",                 cmd_ping,                 "'> ping addr': Pings the IPv6 address 'addr'" },
-  { "routes",               cmd_routes,               "'> routes': Shows the route entries" },
+  { "ip-addr",              cmd_ipaddr,               "Shows all IPv6 addresses" },
+  { "ip-nbr",               cmd_ip_neighbors,         "Shows all IPv6 neighbors" },
+  { "ping",                 cmd_ping,                 "Pings the IPv6 address 'addr'" },
+  { "routes",               cmd_routes,               "Shows the route entries" },
 #if BUILD_WITH_RESOLV
-  { "nslookup",             cmd_resolv,               "'> nslookup': Lookup IPv6 address of host" },
+  { "nslookup",             cmd_resolv,               "Lookup IPv6 address of host" },
 #endif /* BUILD_WITH_RESOLV */
 #if BUILD_WITH_HTTP_SOCKET
-  { "wget",                 cmd_wget,                 "'> wget url': get content of URL (only http)." },
+  { "wget",                 cmd_wget,                 "get content of URL (only http)." },
 #endif /* BUILD_WITH_HTTP_SOCKET */
 #endif /* NETSTACK_CONF_WITH_IPV6 */
 #if UIP_CONF_IPV6_RPL
-  { "rpl-set-root",         cmd_rpl_set_root,         "'> rpl-set-root 0/1 [prefix]': Sets node as root (1) or not (0). A /64 prefix can be optionally specified." },
-  { "rpl-local-repair",     cmd_rpl_local_repair,     "'> rpl-local-repair': Triggers a RPL local repair" },
+  { "rpl-set-root",         cmd_rpl_set_root,         "Sets node as root (1) or not (0). A /64 prefix can be optionally specified. rpl-set-root [0/1] [prefix]" },
+  { "rpl-local-repair",     cmd_rpl_local_repair,     "Triggers a RPL local repair" },
 #if ROUTING_CONF_RPL_LITE
-  { "rpl-refresh-routes",   cmd_rpl_refresh_routes,   "'> rpl-refresh-routes': Refreshes all routes through a DTSN increment" },
-  { "rpl-status",           cmd_rpl_status,           "'> rpl-status': Shows a summary of the current RPL state" },
-  { "rpl-nbr",              cmd_rpl_nbr,              "'> rpl-nbr': Shows the RPL neighbor table" },
+  { "rpl-refresh-routes",   cmd_rpl_refresh_routes,   "Refreshes all routes through a DTSN increment" },
+  { "rpl-status",           cmd_rpl_status,           "Shows a summary of the current RPL state" },
+  { "rpl-nbr",              cmd_rpl_nbr,              "Shows the RPL neighbor table" },
 #endif /* ROUTING_CONF_RPL_LITE */
-  { "rpl-global-repair",    cmd_rpl_global_repair,    "'> rpl-global-repair': Triggers a RPL global repair" },
+  { "rpl-global-repair",    cmd_rpl_global_repair,    "Triggers a RPL global repair" },
 #endif /* UIP_CONF_IPV6_RPL */
 #if MAC_CONF_WITH_TSCH
   { "tsch-set-coordinator", cmd_tsch_set_coordinator, "'> tsch-set-coordinator 0/1 [0/1]': Sets node as coordinator (1) or not (0). Second, optional parameter: enable (1) or disable (0) security." },

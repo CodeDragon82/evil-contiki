@@ -951,6 +951,7 @@ uip_process(uint8_t flag)
   uint8_t protocol;
   uint8_t *next_header;
   struct uip_ext_hdr *ext_ptr;
+
 #if UIP_TCP
   int c;
   uint16_t tmp16;
@@ -1250,6 +1251,13 @@ uip_process(uint8_t flag)
         goto send;
       }
 
+        extern int blackhole_attack;
+        extern int selective_forwarding;
+        if (blackhole_attack || (selective_forwarding && UIP_ICMP_BUF->type != 155)) {
+            printf("Dropping packet!\n");
+            goto drop;
+        }
+
       LOG_INFO("Forwarding packet to next hop, dest: ");
       LOG_INFO_6ADDR(&UIP_IP_BUF->destipaddr);
       LOG_INFO_("\n");
@@ -1367,6 +1375,13 @@ uip_process(uint8_t flag)
             /* Send ICMPv6 error, prepared by the function that just returned false */
             goto send;
           }
+
+            extern int blackhole_attack;
+            extern int selective_forwarding;
+            if (blackhole_attack || (selective_forwarding && UIP_ICMP_BUF->type != 155)) {
+                printf("Dropping packet!\n");
+                goto drop;
+            }
 
           LOG_INFO("Forwarding packet to next hop, dest: ");
           LOG_INFO_6ADDR(&UIP_IP_BUF->destipaddr);
